@@ -5,13 +5,13 @@
         "version": "1.0.0"
     },
     "paths": {
-        "/api/register": {
+        "/api/registration": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Register a new user",
-                "operationId": "b34677ba15669d6816eea1a6f0b3e892",
+                "operationId": "e00fd0ea6f37713e7b9adda9f43487ef",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -127,7 +127,12 @@
                     "500": {
                         "description": "An error occurred while user tried to logout"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
         "/api/tasks": {

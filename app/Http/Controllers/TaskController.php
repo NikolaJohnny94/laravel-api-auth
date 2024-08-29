@@ -2,33 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Task;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-// use App\Repositories\TaskRepository;
+use App\Repositories\TaskRepository;
 
-/**
- * @OA\Info(
- *     title="Task API",
- *     version="1.0.0"
- * )
- * 
- *  @OA\SecurityScheme(
- *     securityScheme="sanctum",
- *     type="apiKey",
- *     in="header",
- *     name="Authorization"
- * )
- */
+
 class TaskController extends Controller
 {
-    // protected $taskRepository;
-    // public function __construct(TaskRepository $taskRepository) {
-    //     $this->taskRepository = $taskRepository;
-    // }
+
+    protected $taskRepository;
+    public function __construct(TaskRepository $taskRepository)
+    {
+        $this->taskRepository = $taskRepository;
+    }
     /**
      * @OA\Get(
      *     path="/api/tasks",
@@ -52,16 +41,7 @@ class TaskController extends Controller
     public function index()
     {
         try {
-            $tasks = Task::all();
-
-            // switch ($tasks->isEmpty()) {
-            //     case 1:
-            //         $message = 'There are no tasks in the DB';
-            //         break;
-            //     case 0:
-            //         $message = 'Tasks successfully retrieved from the DB';
-            //         break;
-            // }
+            $tasks = $this->taskRepository->getTasks();
 
             $message = $tasks->isEmpty() ? 'There are no tasks in the DB' : 'Tasks successfully retrieved from the DB';
 
@@ -110,10 +90,10 @@ class TaskController extends Controller
                 'category' => 'required|in:work,personal,other',
             ]);
 
-            $newTask = Task::create(array_merge($validatedData, ['user_id' => Auth::id()]));
+            $newTask = $this->taskRepository->createTask(array_merge($validatedData, ['user_id' => Auth::id()]));
             return response(['success' => true, 'message' => 'New task successfully created', 'data' => $newTask], 201);
         } catch (ValidationException $e) {
-            return response(['success' => false, 'message' => 'Validation failed while trying to create new task', 'error_message' => $e->errors()], 422);
+            return response(['success' => false, 'message' => 'Validation failed while user tried to create new task', 'error_message' => $e->errors()], 422);
         } catch (Exception $e) {
             return response(["success" => false, 'message' => "Error occured while trying create new task", 'error_message' => $e->getMessage()], 500);
         }
@@ -152,7 +132,7 @@ class TaskController extends Controller
     public function show(string $id)
     {
         try {
-            $task = Task::findOrFail($id);
+            $task = $this->taskRepository->findTaskById($id);
             return response(['success' => true, 'message' => "Task with id: $id successfully retrieved from the DB", 'data' => $task], 200);
         } catch (ModelNotFoundException $e) {
             return response(["success" => false, 'message' => "Task with id $id not found in the DB.", 'error_message' => $e->getMessage()], 404);
@@ -206,8 +186,7 @@ class TaskController extends Controller
                 'category' => 'sometimes|required|in:work,personal,other',
             ]);
 
-            $task = Task::findOrFail($id);
-            $task->update($validatedData);
+            $task = $this->taskRepository->updateTask($id, $validatedData);
 
             return response(['success' => true, 'message' => "Task with id $id successfully updated", 'data' => $task], 200);
         } catch (ValidationException $e) {
@@ -215,7 +194,7 @@ class TaskController extends Controller
         } catch (ModelNotFoundException $e) {
             return response(['success' => false, 'message' => "Task with id $id not found in the DB.", 'error_message' => $e->getMessage()], 404);
         } catch (Exception $e) {
-            return response(['success' => false, 'message' => "An error occurred while updating the task with id:", 'error_message' => $e->getMessage()], 500);
+            return response(['success' => false, 'message' => "An error occurred while updating the task with id: $id.", 'error_message' => $e->getMessage()], 500);
         }
     }
 
@@ -251,8 +230,8 @@ class TaskController extends Controller
     public function destroy(string $id)
     {
         try {
-            $task = Task::findOrFail($id);
-            $task->delete();
+            $this->taskRepository->deleteTask($id);
+
             return response(['success' => true, 'message' => "Task with id: $id successfully deleted from the DB"], 200);
         } catch (ModelNotFoundException $e) {
             return response(["success" => false, 'message' => "Task with id $id not found in the DB.", 'error_message' => $e->getMessage()], 404);
@@ -286,20 +265,12 @@ class TaskController extends Controller
      *     )
      * )
      */
-    public function search($name)
+    public function search($title)
     {
         try {
-            $tasks = Task::whereRaw('LOWER(title) LIKE ?', ['%' . strtolower($name) . '%'])->get();
+            $tasks = $this->taskRepository->searchTaskByTitle($title);
+            $message = $tasks->isEmpty() ? "No tasks found matching the search criteria: '$title'" : "Tasks that match search criteria: '$title' successfully retrieved from the DB";
 
-            // switch ($tasks->isEmpty()) {
-            //     case 1:
-            //         $message = "No tasks found matching the search criteria: '$name'";
-            //         break;
-            //     case 0:
-            //         $message = "Tasks that match search criteria: '$name' successfully retrieved from the DB";
-            //         break;
-            // }
-            $message = $tasks->isEmpty() ? "No tasks found matching the search criteria: '$name'" : "Tasks that match search criteria: '$name' successfully retrieved from the DB";
             return response(['success' => true, 'message' => $message, 'data' => $tasks], 200);
         } catch (Exception $e) {
             return response(['success' => false, 'message' => 'Unexpected error occurred while processing search request', 'error_message' => $e->getMessage()], 500);

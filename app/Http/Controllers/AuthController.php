@@ -3,17 +3,23 @@
 namespace App\Http\Controllers;
 
 use Exception;
-use \Illuminate\Validation\ValidationException;
-use App\Models\User;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Repositories\AuthRepository;
+
 
 class AuthController extends Controller
 {
+    protected $authRepository;
 
+    public function __construct(AuthRepository $authRepository)
+    {
+        $this->authRepository = $authRepository;
+    }
     /**
      * @OA\Post(
-     *     path="/api/register",
+     *     path="/api/registration",
      *     tags={"Auth"},
      *     summary="Register a new user",
      *     @OA\RequestBody(
@@ -49,11 +55,7 @@ class AuthController extends Controller
                 'password' => 'required|string|confirmed'
             ]);
 
-            $new_user = User::create([
-                'name' => $fields['name'],
-                'email' => $fields['email'],
-                'password' => Hash::make($fields['password']),
-            ]);
+            $new_user = $this->authRepository->registerNewUser($fields);
 
             $token = $new_user->createToken('token')->plainTextToken;
 
@@ -103,7 +105,7 @@ class AuthController extends Controller
                 'password' => 'required|string'
             ]);
 
-            $user = User::where('email', $fields['email'])->first();
+            $user = $this->authRepository->loginUser($fields);
 
             if (!$user || !Hash::check($fields['password'], $user->password)) return response(['success' => false, 'message' => 'Invalid credentials'], 401);
 
@@ -122,6 +124,7 @@ class AuthController extends Controller
      *     path="/api/logout",
      *     tags={"Auth"},
      *     summary="Logout a user",
+     *     security={{"sanctum":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="User successfully logged out"
@@ -135,7 +138,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         try {
-            $request->user()->tokens()->delete();
+            $this->authRepository->logoutUser($request);
             return response(['success' => true, 'message' => 'User successfully logged out'], 200);
         } catch (Exception $e) {
             return response(['success' => false, 'message' => 'An error occurred while user tried to logout', 'error_message' => $e->getMessage()], 500);

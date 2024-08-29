@@ -1,7 +1,8 @@
 <?php
 
-// app/Repositories/TaskRepository.php
 namespace App\Repositories;
+
+// use Illuminate\Http\Request;
 
 use App\Models\Task;
 
@@ -9,6 +10,8 @@ class TaskRepository
 {
     public function getTasks()
     {
+        // $user = $request->user();
+        // $tasks = Task::where('user_id', $user->id)->get();
         return Task::all();
     }
 
@@ -39,5 +42,10 @@ class TaskRepository
         $task = Task::findOrFail($id);
         $task->delete();
         return $task;
+    }
+
+    public function searchTaskByTitle(string $title)
+    {
+        return Task::whereRaw('LOWER(title) LIKE ?', ['%' . strtolower($title) . '%'])->get();
     }
 }

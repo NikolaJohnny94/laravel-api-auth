@@ -6,11 +6,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post("/login", [AuthController::class, "login"]);
+Route::post("/registration", [AuthController::class, "registration"]);
 
-Route::resource('tasks', TaskController::class)->middleware('auth:sanctum');
-Route::get('/tasks/search/{name}', [TaskController::class, 'search'])->middleware('auth:sanctum');
-
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Protected routes
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Tasks
+    Route::resource('tasks', TaskController::class);
+    Route::get('/tasks/search/{name}', [TaskController::class, 'search']);
+    // Auth
+    Route::post("/logout", [AuthController::class, "logout"]);
+    // User
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+});
