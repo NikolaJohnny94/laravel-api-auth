@@ -2,18 +2,13 @@
 
 namespace App\Utils;
 
-class ErrorResponse
+class ErrorResponse extends BasicResponse
 {
-    public $success;
-
-    public $message;
     public $error_message;
-
 
     public function __construct($success, $message, $error_message)
     {
-        $this->success = $success;
-        $this->message = $message;
+        parent::__construct($success, $message);
         $this->error_message = $error_message;
     }
 }

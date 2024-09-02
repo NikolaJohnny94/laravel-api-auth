@@ -2,7 +2,7 @@
 
 ### Description 📜
 
-Laravel Tasks CRUD API with atuhentification, search functionality, db seeding, unit tests and Swagger documentation. <br>
+Laravel Tasks CRUD API with atuhentification, search functionality, DB seeding, Unit tests and Swagger documentation. <br>
 Users need to register and authenticate using Laravel Sanctum to gain access to the application’s features. Once authenticated, users can perform CRUD (Create, Read, Update, Delete) operations on tasks, search for tasks by title, and logout securely. The application ensures secure access to these functionalities through token-based authentication, providing a robust and secure environment for managing tasks and user sessions.
 
 <hr/>
@@ -22,6 +22,8 @@ Users need to register and authenticate using Laravel Sanctum to gain access to 
 -   Running the Project
 -   Unit Tests
 -   Swagger Documentation
+-   User Permissions
+-   Authorization Errors
 
 ## Installation
 
@@ -129,6 +131,17 @@ Swagger is integrated into the project for API documentation.
 2. Access the Swagger UI at `/api/documentation`.
 
 3. Update the Swagger configuration in `config/swagger.php` as needed.
+
+## User Permissions
+
+Each user can only access, edit, view, and delete their own tasks. This ensures that user data is kept private and secure.
+
+## Authorization Errors
+
+If you encounter an authorization error, please ensure that you are logged in with the correct credentials. Common authorization errors include:
+
+-   **_Unauthorized access_**: You do not have permission to access this resource.
+-   **_Invalid token_**: Your session has expired. Please log in again.
 
 ---
 

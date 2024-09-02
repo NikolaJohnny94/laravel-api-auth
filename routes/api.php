@@ -12,7 +12,7 @@ Route::post("/registration", [AuthController::class, "registration"]);
 Route::middleware(['auth:sanctum'])->group(function () {
     // Tasks
     Route::resource('tasks', TaskController::class);
-    Route::get('/tasks/search/{name}', [TaskController::class, 'search']);
+    Route::get('/tasks/search/{title}', [TaskController::class, 'search']);
     // Auth
     Route::post("/logout", [AuthController::class, "logout"]);
     // User

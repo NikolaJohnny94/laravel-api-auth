@@ -2,22 +2,42 @@
 
 namespace App\Repositories;
 
-// use Illuminate\Http\Request;
-
+use Illuminate\Http\Request;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Models\Task;
+
 
 class TaskRepository
 {
+
+    protected $request;
+
+    public function __construct(Request $request)
+    {
+        $this->request = $request;
+    }
     public function getTasks()
     {
-        // $user = $request->user();
-        // $tasks = Task::where('user_id', $user->id)->get();
-        return Task::all();
+        $user = $this->request->user();
+        $tasks = Task::where('user_id', $user->id)->get();
+        return $tasks;
     }
 
     public function findTaskById(int $id)
     {
-        return Task::findOrFail($id);
+        $user = $this->request->user();
+        $task = Task::where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$task) {
+            if (Task::where('id', $id)->exists()) {
+                throw new AuthorizationException("Not authorized!");
+            } else {
+                throw new ModelNotFoundException("Task not found!");
+            }
+        }
+
+        return $task;
     }
 
     public function createTask(array $data)
@@ -27,25 +47,47 @@ class TaskRepository
 
     public function updateTask($id, array $data)
     {
-        $task = Task::findOrFail($id);
+        $user = $this->request->user();
+        $task = Task::where('id', $id)->where('user_id', $user->id)->first();
+
+
+        if (!$task) {
+            if (Task::where('id', $id)->exists()) {
+                throw new AuthorizationException("Not authorized!");
+            } else {
+                throw new ModelNotFoundException("Task not found!");
+            }
+        }
+
         $task->update($data);
         return $task;
     }
 
-    public function findOrFail($id)
-    {
-        return Task::findOrFail($id);
-    }
-
     public function deleteTask(int $id)
     {
-        $task = Task::findOrFail($id);
+
+        $user = $this->request->user();
+        $task = Task::where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$task) {
+            if (Task::where('id', $id)->exists()) {
+                throw new AuthorizationException("Not authorized!");
+            } else {
+                throw new ModelNotFoundException("Task not found!");
+            }
+        }
+
         $task->delete();
         return $task;
     }
 
     public function searchTaskByTitle(string $title)
     {
-        return Task::whereRaw('LOWER(title) LIKE ?', ['%' . strtolower($title) . '%'])->get();
+        $user = $this->request->user();
+        $tasks = Task::where('user_id', $user->id)
+            ->whereRaw('LOWER(title) LIKE ?', ['%' . strtolower($title) . '%'])
+            ->get();
+
+        return $tasks;
     }
 }

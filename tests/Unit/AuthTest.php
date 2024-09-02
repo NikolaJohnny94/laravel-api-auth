@@ -31,7 +31,7 @@ class AuthTest extends TestCase
 
         $request = Request::create('/register', 'POST', [
             'name' => 'Test User',
-            'email' => 'new_user@example.com',
+            'email' => 'newuser@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
@@ -52,9 +52,6 @@ class AuthTest extends TestCase
         $this->assertEquals(true, $responseData['success']);
         $this->assertEquals('mocked_token', $responseData['token']);
     }
-
-
-
 
     public function test_registration_returns_validation_error()
     {
@@ -86,6 +83,7 @@ class AuthTest extends TestCase
         // Act: Call the registration method
         $controller->registration($request);
     }
+
     public function test_registration_handles_exception()
     {
         // Arrange: Mock the User model to throw a generic Exception
@@ -153,7 +151,7 @@ class AuthTest extends TestCase
         $responseData = json_decode($response->getContent(), true);
 
         // Assert: Check the response
-        $this->assertEquals(201, $response->status());
+        $this->assertEquals(200, $response->status());
         $this->assertEquals(true, $responseData['success']);
         $this->assertEquals('mocked_token', $responseData['token']);
     }
@@ -178,7 +176,7 @@ class AuthTest extends TestCase
         // Assert: Check the response
         $this->assertEquals(422, $response->status());
         $this->assertEquals(false, $responseData['success']);
-        $this->assertArrayHasKey('errors', $responseData);
+        $this->assertArrayHasKey('error_message', $responseData);
     }
 
     public function test_login_returns_invalid_credentials()
@@ -254,7 +252,7 @@ class AuthTest extends TestCase
         $controller = new AuthController($authRepositoryMock);
 
         // Act: Call the logout method
-        $response = $controller->logout($request);
+        $response = $controller->logout();
         $responseData = json_decode($response->getContent(), true);
 
         // Assert: Check the response
@@ -280,7 +278,7 @@ class AuthTest extends TestCase
         $controller = new AuthController($authRepositoryMock);
 
         // Act: Call the logout method
-        $response = $controller->logout($request);
+        $response = $controller->logout();
         $responseData = json_decode($response->getContent(), true);
 
         // Assert: Check the response

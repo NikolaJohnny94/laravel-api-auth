@@ -59,7 +59,6 @@ class TaskTest extends TestCase
         $this->assertCount(2, $responseData['data']);
     }
 
-
     public function test_index_returns_no_tasks_message_when_no_tasks_exist()
     {
         /** @var \Mockery\LegacyMockInterface&\Mockery\MockInterface|TaskRepository $taskRepositoryMock */
@@ -92,8 +91,8 @@ class TaskTest extends TestCase
         $responseData = json_decode($response->getContent(), true);
 
         // Assert: Check the response
-        $this->assertEquals(200, $response->status());
-        $this->assertEquals('Error occured while trying to retrieve tasks from DB', $responseData['message']);
+        $this->assertEquals(500, $response->status());
+        $this->assertEquals('Error occurred while trying to retrieve tasks from DB', $responseData['message']);
         $this->assertEquals('Database error', $responseData['error_message']);
     }
 
@@ -159,7 +158,7 @@ class TaskTest extends TestCase
 
         // Assert: Check the response
         $this->assertEquals(500, $response->status());
-        $this->assertEquals('Error occured while trying to retrive task with id: 1.', $responseData['message']);
+        $this->assertEquals('Error occurred while trying to retrieve task with id: 1.', $responseData['message']);
         $this->assertEquals('Database error', $responseData['error_message']);
     }
 
@@ -200,6 +199,7 @@ class TaskTest extends TestCase
         $this->assertEquals('New task successfully created', $responseData['message']);
         $this->assertEquals($mockedTask, (object) $responseData['data']);
     }
+
     public function test_store_returns_validation_error()
     {
         /** @var \Mockery\LegacyMockInterface&\Mockery\MockInterface|TaskRepository $taskRepositoryMock */
@@ -227,12 +227,12 @@ class TaskTest extends TestCase
             throw new ValidationException($validator);
         }
 
-
         $controller = new TaskController($taskRepositoryMock);
 
         // Act: Call the store method
         $controller->store($request);
     }
+
     public function test_store_handles_exception()
     {
         // Arrange: Mock the Task model to throw an exception
@@ -257,7 +257,7 @@ class TaskTest extends TestCase
 
         // Assert: Check the response
         $this->assertEquals(500, $response->status());
-        $this->assertEquals('Error occured while trying create new task', $responseData['message']);
+        $this->assertEquals('Error occurred while trying to create new task', $responseData['message']);
         $this->assertEquals('Database error', $responseData['error_message']);
     }
 
@@ -282,6 +282,7 @@ class TaskTest extends TestCase
         $this->assertEquals(200, $response->status());
         $this->assertEquals('Task with id: 1 successfully deleted from the DB', $responseData['message']);
     }
+
     public function test_destroy_returns_not_found_when_task_does_not_exist()
     {
         // Arrange: Mock the TaskRepository to throw a ModelNotFoundException
@@ -301,7 +302,6 @@ class TaskTest extends TestCase
         $this->assertEquals('Task with id 1 not found in the DB.', $responseData['message']);
     }
 
-
     public function test_destroy_handles_exception()
     {
         // Arrange: Mock the TaskRepository to throw a generic Exception
@@ -318,10 +318,9 @@ class TaskTest extends TestCase
 
         // Assert: Check the response
         $this->assertEquals(500, $response->status());
-        $this->assertEquals('Error occured while trying to delete task with id: 1.', $responseData['message']);
+        $this->assertEquals('Error occurred while trying to delete task with id: 1.', $responseData['message']);
         $this->assertEquals('Database error', $responseData['error_message']);
     }
-
 
     // UPDATE
     public function test_update_successfully_updates_task()
@@ -497,7 +496,6 @@ class TaskTest extends TestCase
         $this->assertEquals("No tasks found matching the search criteria: 'task'", $responseData['message']);
         $this->assertEmpty($responseData['data']);
     }
-
 
     public function test_search_handles_exception()
     {

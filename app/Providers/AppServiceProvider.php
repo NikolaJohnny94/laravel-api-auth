@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\TaskRepository;
 use App\Repositories\AuthRepository;
+use Illuminate\Http\Request;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,11 +15,11 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(TaskRepository::class, function ($app) {
-            return new TaskRepository();
+            return new TaskRepository($app->make(Request::class));
         });
 
         $this->app->bind(AuthRepository::class, function ($app) {
-            return new AuthRepository();
+            return new AuthRepository($app->make(Request::class));
         });
     }
 

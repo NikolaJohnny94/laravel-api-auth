@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 /**
  * @OA\Info(
- *     title="Task API",
+ *     title="Laravel CRUD API with Authentification",
  *     version="1.0.0"
  * )
  * 

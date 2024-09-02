@@ -2,12 +2,19 @@
 
 namespace App\Repositories;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+
 
 class AuthRepository
 {
+    protected $request;
+
+    public function __construct(Request $request)
+    {
+        $this->request = $request;
+    }
     public function registerNewUser(array $fields)
     {
         return User::create([
@@ -20,8 +27,8 @@ class AuthRepository
     {
         return User::where('email', $fields['email'])->first();
     }
-    public function logoutUser(Request $request)
+    public function logoutUser()
     {
-        $request->user()->tokens()->delete();
+        $this->request->user()->tokens()->delete();
     }
 }
